@@ -1,17 +1,34 @@
-FROM node:16
+# Stage 1
+# Build docker image of react app
+FROM node:17.9.0 as build-stage
 
-WORKDIR /app
+# set working directory
+RUN mkdir /usr/app
+#copy all files from current directory to docker
+COPY . /usr/app
 
-COPY . /app
+WORKDIR /usr/app
 
-ENV REACT_APP_REST=/api
+# install and cache app dependencies
+RUN yarn
 
-RUN npm install
-
-RUN npm i -g serve
+# add `/usr/src/app/node_modules/.bin` to $PATH
+ENV PATH /usr/src/app/node_modules/.bin:$PATH
 
 RUN npm run build
 
-EXPOSE 5000
+# Stage 2
+# Copy the react app build above in nginx
+FROM nginx:latest
 
-CMD ["serve", "-s", "build"]
+# Set working directory to nginx asset directory
+WORKDIR /usr/share/nginx/html
+
+# Remove default nginx static assets
+RUN rm -rf ./*
+
+# Copy static assets from builder stage
+COPY --from=build-stage /usr/app/build .
+
+# Containers run nginx with global directives and daemon off
+ENTRYPOINT ["nginx", "-g", "daemon off;"]
