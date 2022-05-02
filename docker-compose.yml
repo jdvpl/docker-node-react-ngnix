@@ -5,23 +5,25 @@ services:
     build: ./backend
     expose:
       - 8000
+    ports:
+      - 8000:4000
     volumes:
       - ./backend:/usr/src/app
   reactapp:
+    stdin_open: true
     container_name: reactapp
     build: ./frontend
     expose:
-      - 5000
+      - 8080
+    ports:
+        - 8080:80
+    environment:
+          - CHOKIDAR_USEPOLLING=true
     volumes:
       - ./frontend:/usr/src/app
-  nginx:
-    build: ./nginx
-    ports:
-      - 80:80
     links:
       - expressapp
-      - reactapp
-    restart: always
+
 
 
   

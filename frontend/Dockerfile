@@ -14,7 +14,7 @@ RUN yarn
 
 # add `/usr/src/app/node_modules/.bin` to $PATH
 ENV PATH /usr/src/app/node_modules/.bin:$PATH
-
+ENV REACT_APP_REST_API=http://localhost:8000/
 RUN npm run build
 
 # Stage 2
